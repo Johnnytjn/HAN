@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import re
 
 import jieba
 import pandas as pd
@@ -147,22 +148,25 @@ class DataSet(object):
         with open(self.data_file, 'r') as f:
             while pos< self.batch_len-1:
                 source_tokens = []
-                for lines in f.readlines()[pos:pos+self.batch_size]:
+                for line in f.readlines()[pos:pos+self.batch_size]:  # 单条原始语料
                     one_sent_source_tokens = []
-                    sentences = lines.split("[。？！~ ]")
-                    if len(sentences) < self.max_sent_in_doc:
-                        for _ in range(self.max_sent_in_doc-len(sentences)):
-                            sentences.append([0]*self.max_word_in_sent)
-                    else:
+                    sentences = re.split(r'[。？！~]', line)
+                    if len(sentences) > self.max_sent_in_doc:
                         sentences = sentences[:self.max_sent_in_doc]
+
                     for sentence in sentences:
+                        sentence = sentence.split()  # str --> list
                         if len(sentence)<self.max_word_in_sent:
-                            sentence.extend([0]*(self.max_word_in_sent-len(sentence)))
+                            sentence.extend([UNK_ID] * (self.max_word_in_sent-len(sentence)))
                         else:
                             sentence = sentence[:self.max_word_in_sent]
-                        tokens = [SOS_ID] + [self.w2i.get(t,UNK_ID) for t in sentence.split()] + [EOS_ID]
+                        tokens = [SOS_ID] + [self.w2i.get(t,UNK_ID) for t in sentence] + [EOS_ID]
                         one_sent_source_tokens.append(tokens)
+
+                    if len(sentences) < self.max_sent_in_doc:
+                        for _ in range(self.max_sent_in_doc-len(sentences)):
+                            one_sent_source_tokens.append([UNK_ID]*self.max_word_in_sent)
                     source_tokens.append(one_sent_source_tokens)
                 yield(source_tokens, self.labels[pos:pos+self.batch_size])
-                pos += self.batch_size
+                pos += 1
 
