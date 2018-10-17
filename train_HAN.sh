@@ -1,0 +1,22 @@
+python3 -m train_HAN \
+--mode=train \
+--learning_rate=0.01 \
+--vocab_file=/home/wzh/PycharmProjects/tongjianing/data/vocab.10000.txt \
+--num_train_epoch=32 \
+--train_csv_file=/home/wzh/PycharmProjects/tongjianing/data/ai_challenger_sentiment_analysis_trainingset_20180816/sentiment_analysis_trainingset.csv \
+--train_data_file=/home/wzh/PycharmProjects/tongjianing/data/train_data.txt \
+--eval_csv_file=/home/wzh/PycharmProjects/tongjianing/data/ai_challenger_sentiment_analysis_validationset_20180816/sentiment_analysis_validationset.csv \
+--eval_data_file=/home/wzh/PycharmProjects/tongjianing/data/eval_data.txt \
+--checkpoint_dir=/home/wzh/PycharmProjects/dianping/checkpoint/rnn_1016 \
+--max_sent_in_doc=50 \
+--max_word_in_sent=30 \
+--batch_num=50 \
+--batch_size=8 \
+--embeddding_size=256 \
+--hidden_size=128 \
+--steps_per_summary=500 \
+--steps_per_stats=50 \
+--steps_per_eval=500 \
+--decay_schema=exp \
+--decay_steps=100 \
+--num_gpus=2
