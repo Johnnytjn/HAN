@@ -159,7 +159,7 @@ class HAN():
             return atten_output
 
     def setup_loss(self):
-        self.loss = tf.nn.softmax_cross_entropy_with_logits(logits=self.out+1e-10, labels=self.input_y)
+        self.loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.out+1e-10, labels=self.input_y)
         self.losses = tf.reduce_mean(self.loss)
         self.prediction = tf.argmax(self.out,1,output_type=tf.int32)
         correct_prediction = tf.equal(self.prediction,self.input_y)

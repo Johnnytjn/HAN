@@ -144,29 +144,32 @@ class DataSet(object):
 
 
     def get_next(self):
-        pos = 0
+        self.labels = [i + 2 for i in self.labels]
         with open(self.data_file, 'r') as f:
-            while pos< self.batch_len-1:
-                source_tokens = []
-                for line in f.readlines()[pos:pos+self.batch_size]:  # 单条原始语料
-                    one_sent_source_tokens = []
-                    sentences = re.split(r'[。？！~]', line)
-                    if len(sentences) > self.max_sent_in_doc:
-                        sentences = sentences[:self.max_sent_in_doc]
+            self.features = f.readlines()
 
-                    for sentence in sentences:
-                        sentence = sentence.split()  # str --> list
-                        if len(sentence)<self.max_word_in_sent:
-                            sentence.extend([UNK_ID] * (self.max_word_in_sent-len(sentence)))
-                        else:
-                            sentence = sentence[:self.max_word_in_sent]
-                        tokens = [SOS_ID] + [self.w2i.get(t,UNK_ID) for t in sentence] + [EOS_ID]
-                        one_sent_source_tokens.append(tokens)
+        pos = 0
+        while pos< self.batch_len-1:
+            source_tokens = []
+            for line in self.features[pos:pos+self.batch_size]:  # 单条原始语料
+                one_sent_source_tokens = []
+                sentences = re.split(r'[。？！~]', line)
+                if len(sentences) > self.max_sent_in_doc:
+                    sentences = sentences[:self.max_sent_in_doc]
 
-                    if len(sentences) < self.max_sent_in_doc:
-                        for _ in range(self.max_sent_in_doc-len(sentences)):
-                            one_sent_source_tokens.append([UNK_ID]*self.max_word_in_sent)
-                    source_tokens.append(one_sent_source_tokens)
-                yield(source_tokens, self.labels[pos:pos+self.batch_size])
-                pos += 1
+                for sentence in sentences:
+                    sentence = sentence.split()  # str --> list
+                    if len(sentence) < self.max_word_in_sent - 2:
+                        sentence.extend([UNK_ID] * (self.max_word_in_sent-len(sentence)-2))
+                    else:
+                        sentence = sentence[:self.max_word_in_sent-2]
+                    tokens = [SOS_ID] + [self.w2i.get(t,UNK_ID) for t in sentence] + [EOS_ID]
+                    one_sent_source_tokens.append(tokens)
+
+                if len(sentences) < self.max_sent_in_doc:
+                    for _ in range(self.max_sent_in_doc-len(sentences)):
+                        one_sent_source_tokens.append([SOS_ID] + [UNK_ID]*(self.max_word_in_sent-2) + [EOS_ID])
+                source_tokens.append(one_sent_source_tokens)
+            yield(source_tokens, self.labels[pos:pos+self.batch_size])
+            pos += 1
 
