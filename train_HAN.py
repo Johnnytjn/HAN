@@ -127,7 +127,7 @@ def train(flags):
                     checkpoint_path  = train_model.save_model(train_sess)
                     with tf.Session(graph=eval_graph, config=get_config_proto(log_device_placement=False)) as eval_sess:
                         eval_model.saver.restore(eval_sess, checkpoint_path)
-                        eval_ppl = train_eval(eval_model, eval_sess, eval_dataset)
+                        _, eval_ppl = train_eval(eval_model, eval_sess, eval_dataset)
                         if eval_ppl < best_eval:
                             eval_model.save_model(eval_sess)
                             best_eval = eval_ppl
